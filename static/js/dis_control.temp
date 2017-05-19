@@ -1,0 +1,99 @@
+<script>
+String.format = function(format) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return format.replace(/{(\d+)}/g, function(match, number) { 
+        return typeof args[number] != 'undefined'
+            ? args[number] 
+            : match
+        ;
+    });
+};
+
+var starpost = function(pageid, line) {
+    var op = 1;
+    var status ='/world';
+    if (line == 'Alpha') {op = 2; status = '/alpha'}
+    else if (line == 'Beta') {op = 3; status = '/beta'}
+    $.post( "/starpost",
+            { starpost : pageid,
+              line : op},
+            function(data){
+                if(data == 'ok200') alert('Thank you');
+                else alert(data);
+            });
+}
+
+var flagpost = function(tit, u, pageid) {
+    $.post( "/flagpost",
+            {title : tit,
+             url   : u,
+             flagpost : pageid},
+            function(data){
+                if(data == 'ok200') alert('Flaged it!');
+                else alert(data);
+            });
+}
+
+var disqusurl = "http://sapphiresoft.io/disqus?uniqueid=";
+
+var disqus_head  = `<blockquote style=\"margin: 10px auto;\">\
+                          <h4> {0} • {1} </h4> </blockquote>\
+                    <div class=\"panel panel-default\">\
+                     <div class=\"panel-body\">\
+                       <h3> {2} </h3> <p> {3} </p>\
+                       <div class='a2a_kit a2a_kit_size_32 a2a_default_style'>\
+                        <a class='a2a_dd' href='https://www.addtoany.com/share'></a>\
+                        <a class='a2a_button_email'></a>\
+                        <a class='a2a_button_sina_weibo'></a>\
+                        <a class='a2a_button_wechat'></a>\
+                        <a class='a2a_button_douban'></a>\
+                        <a class='a2a_button_evernote'></a>\
+                        <a class='a2a_button_pocket'></a>\
+                        <a class='a2a_button_facebook'></a>\
+                        <a class='a2a_button_twitter'></a>\
+                        <a class='a2a_button_google_plus'></a></div>\
+                     </div> \
+                     <div class=\"panel-footer\">\
+                       <a href=\"#navtab\" onclick=\"starpost(\'{4}\',\'{5}\');\"><span class=\"fa fa-thumbs-o-up\"></span> +1</a> &nbsp;\
+                       <a href=\"{6}\" target=\"_blank\"><span class=\"fa fa-external-link\"></span> Open</a> &nbsp;\
+                       <a href=\"#navtab\" onclick=\"flagpost(\'{2}\',\'{6}\',\'{4}\');\"><span class=\"fa fa-flag-o\"></span> Flag</a> &nbsp;\
+                     </div></div>\
+                     <div class=\"panel panel-default\">\
+                        <div class=\"panel-body\">\
+                            <div id=\"disqus_thread\"></div></div></div>\
+                    <script>\
+                        var a2a_config = a2a_config || {};\
+                        a2a_config.linkname = '{2}';\
+                        a2a_config.linkurl = disqusurl + '{4}';\
+                    <\/script>\
+                    <script async src="https://static.addtoany.com/menu/page.js"><\/script>`;
+
+
+var disurl = "";
+
+var disqus_config = function () {
+    
+    this.page.title = '%s';
+    this.page.url = disqusurl + '%s';  // Replace PAGE_URL with your page's canonical URL variable
+    disurl = this.page.url;
+    this.page.identifier = '%s'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW 
+    $("#chat_frame").hide();
+    $("#main_frame").hide();
+    $("#disqus_frame").hide();
+    $("#menu_frame").show();
+    var disqusshead = String.format(disqus_head, '%s', '%s', '%s', '%s', '%s', '%s', '%s');
+    $("#menu_frame").html(disqusshead);
+    $("#usermenu").addClass('disabled');
+    $("#submitbtn").addClass('disabled');
+    $("#searchbtn").addClass('disabled');
+    window.location.href = disurl + "#menu_start";
+
+    var d = document, s = d.createElement('script');
+    s.src = 'http://timeslambda.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>

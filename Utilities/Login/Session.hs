@@ -1,0 +1,307 @@
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
+-- TODO switch to TVars?
+
+{-|
+Module:              Web.Scotty.Login.Session
+Description:         Simple library for Scotty sessions and authorization
+Copyright:           (c) Miles Frankel, Yi Zhen, 2016
+License:             GPL-2
+
+A Simple library for session adding and checking, with automatic SQLite backup of session store. The session store is kept in memory for fast access. Session cookie expiration and database syncing timing are configurable. Note that this packages does not handle user authorization; you will have to roll your own (the package persistent is recommended) or use another package.
+
+Example usage:
+
+@
+\{\-\# LANGUAGE OverloadedStrings   \#\-\}
+\{\-\# LANGUAGE ScopedTypeVariables \#\-\}
+
+module Main where
+import qualified Data.Text.Lazy           as T
+import           Web.Scotty               as S
+import           Utilities.Login.Session
+
+conf :: SessionConfig
+conf = defaultSessionConfig
+
+main :: IO ()
+main = do
+  initializeCookieDb conf
+  scotty 8000 routes
+
+routes :: ScottyM ()
+routes = do
+  S.get \"/denied\" $ S.text \"access denied\"
+  S.get \"/login\" $ do S.html $ T.pack $ unlines $
+                        [ \"\<form method=\\\"POST\\\" action=\\\"/login\\\"\>\"
+                        , \"\<input type=\\\"text\\\" name=\\\"username\\\"\>\"
+                        , \"\<input type=\\\"password\\\" name=\\\"password\\\"\>\"
+                        , \"\<input type=\\\"submit\\\" name=\\\"login\\\" value=\\\"login\\\"\>\"
+                        , \"\</form\>\" ]
+  S.post \"/login\" $ do
+    (usn :: String) <- param \"username\"
+    (pass :: String) <- param \"password\"
+    if usn == \"guest\" && pass == \"password\"
+      then do addSession conf
+              redirect \"/authed\"
+      else do redirect \"/denied\"
+  S.get \"\/authcheck\" $ authCheck (redirect \"\/denied\") $
+    S.text \"authorized\"
+@
+-}
+
+module Utilities.Login.Session ( initializeCookieDb
+                                , addSession
+                                , authCheck
+                                , SessionConfig(..)
+                                , Session(..)
+                                , defaultSessionConfig
+                                , logoutSess
+                                , getUserinfo
+                                , getOnlineNum
+                                , getSalt
+                                )
+       where
+import           Control.Concurrent                (forkIO, threadDelay)
+import           Control.Monad.IO.Class
+import qualified Data.Text                         as TS
+import qualified Data.Text.Lazy                    as T
+import           Data.Time.Clock
+import           Database.Persist                  as D
+import           Database.Persist.Sqlite
+import           Network.HTTP.Types.Status         (forbidden403, internalServerError500)
+import           Web.Scotty.Cookie                 as SC
+import           Web.Scotty.Trans                  as S
+
+import           Crypto.Random                     (getRandomBytes)
+import qualified Data.ByteString                   as B
+import           Numeric                           (showHex)
+
+import           Utilities.Login.Internal.Cookies as C
+import           Utilities.Login.Internal.Model
+
+import           Control.Monad.Logger              (NoLoggingT)
+--                                                    runStderrLoggingT)
+import           Control.Monad.Trans.Resource      (ResourceT)
+
+import           Data.IORef
+import           Data.List                         (find, delete)
+import           System.IO.Unsafe                  (unsafePerformIO)
+-- import qualified Data.Map                          as M
+
+-- | Configuration for the session database.
+data SessionConfig =
+  SessionConfig { dbPath             :: String          -- ^ Path to SQLite database file
+                , syncInterval       :: NominalDiffTime -- ^ Time between syncs to database (seconds)
+                , expirationInterval :: NominalDiffTime -- ^ Cookie expiration time (seconds)
+                }
+{- data Session
+  = Session {sessionSid :: !T.Text, sessionExpiration :: !UTCTime} -}
+
+type SessionVault = [Session]
+
+type SessionStore = IORef SessionVault
+
+-- | Default settings for the session store. May not be suitable for all applications.
+--
+-- They are:
+--
+-- * dbPath = \"sessions.sqlite\",
+--
+-- * syncInterval = 1200 seconds (30 minutes),
+--
+-- * expirationInterval = 86400 seconds (1 day)
+
+defaultSessionConfig :: SessionConfig
+defaultSessionConfig = SessionConfig "./database/sessions.sqlite3" 1200 4800
+
+{-# NOINLINE vault #-}
+vault :: SessionStore
+vault = unsafePerformIO $ newIORef []
+
+readVault :: IO SessionVault
+readVault = readIORef vault
+
+-- (,) :: a->b->(a,b) ; () :: ()
+-- flip (,) ==> b0 -> a0 -> (a0, b0)
+-- flip (,) () ==> a0 -> (a0, ())
+-- flip (,) () . f ==> (type of f) -> ((type of f) -> ())
+-- atomifModifyIORef' :: IORef a -> (a -> (a, b)) -> IO b
+modifyVault :: (SessionVault -> SessionVault) -> IO ()
+modifyVault f = atomicModifyIORef' vault (flip (,) () . f)
+
+-- | Reload the session database into memory, and fork the database sync and cleanup thread. This must be called before invoking scotty.
+initializeCookieDb :: SessionConfig -> IO ()
+initializeCookieDb c =  do
+  t <- getCurrentTime
+  ses <- runDB c $ do runMigration migrateAll
+                      selectList [SessionExpiration >=. t] []
+  let sessions = map entityVal ses :: SessionVault
+  modifyVault $ const sessions
+  forkIO $ dbSyncAndCleanupLoop c
+  return ()
+
+dbSyncAndCleanupLoop :: SessionConfig  -> IO ()
+dbSyncAndCleanupLoop c = do
+  threadDelay $ (floor $ syncInterval c) * 1000000
+  t <- getCurrentTime
+  vaultContents <- readVault
+  runDB c $ deleteWhere [SessionExpiration >=. t] -- delete all sessions in db
+  runDB c $ deleteWhere [SessionExpiration <=. t]
+  mapM_ (runDB c . insert) vaultContents -- add vault to db
+  modifyVault $ filter (\s -> sessionExpiration s >= t)
+  dbSyncAndCleanupLoop c -- tail (hopefully) recurse
+
+-- | Add a session. This gives the user a SessionId cookie, and inserts a corresponding entry into the session store. It also returns the Session that was just inserted.
+addSession :: SessionConfig
+           -> T.Text
+           -> Int
+           -> T.Text
+           -> ActionT T.Text IO (Maybe Session)
+addSession c uname lev salt = do
+  vc <- liftIO readVault
+  liftIO $ print $ "adding session" ++ show vc
+  (bh :: B.ByteString) <- liftIO $ getRandomBytes 128
+  t <- liftIO getCurrentTime
+  let val = TS.pack $ mconcat $ map (`showHex` "") $ B.unpack bh
+      t' = addUTCTime (expirationInterval c) t
+  C.setSimpleCookieExpr "SessionId" val t'
+  liftIO $ insertSession (T.fromStrict val) uname lev salt t' 
+  return $ Just $ Session (T.fromStrict val) uname lev salt t' 
+
+
+-- | Check whether a user is authorized.
+--
+-- Example usage:
+--
+-- @
+--    S.get \"\/auth_test\" $ authCheck (redirect \"\/denied\") $
+--      S.text "authorized"
+-- @
+authCheck :: (MonadIO m, ScottyError e)
+             => ActionT e m () -- ^ The action to perform if user is denied
+             -> ActionT e m () -- ^ The action to perform if user is authorized
+             -> ActionT e m ()
+authCheck d a = do
+  vaultContents <- liftIO readVault
+  liftIO $ print $ "checking vault contents: " ++ show vaultContents
+  c <- SC.getCookie "SessionId"
+  case c of
+   Nothing -> d
+   Just v -> do -- Text
+     -- liftIO $ runDB conf $ selectFirst [SessionSid ==. T.fromStrict v] []
+     let session = find (\s -> sessionSid s == T.fromStrict v) vaultContents
+     case session of
+      Nothing ->  d >> status forbidden403
+      Just s -> do let -- s = entityVal e
+                     t = sessionExpiration s
+                   curTime <- liftIO getCurrentTime
+                   if diffUTCTime t curTime > 0
+                     then a
+                          -- this shouldnt happen, browser should delete it
+                     else d >> status forbidden403
+
+
+getOnlineNum :: (MonadIO m, ScottyError e)
+             => ActionT e m Int
+getOnlineNum = do
+  vaultContents <- liftIO readVault
+  return $ length vaultContents
+  
+
+getUserinfo :: (MonadIO m, ScottyError e)
+            => ActionT e m (String, Int)
+getUserinfo = do
+  vaultContents <- liftIO readVault
+  c <- SC.getCookie "SessionId"
+  case c of
+   Nothing -> return ("guest", 0)
+   Just v -> do -- Text
+     let session = find (\s -> sessionSid s == T.fromStrict v) vaultContents
+     case session of
+       Nothing -> return ("guest", 0)
+       Just (Session _ name lev _ _) -> return (T.unpack name, lev)
+
+
+getSalt :: (MonadIO m, ScottyError e)
+        => ActionT e m T.Text
+getSalt = do
+  vaultContents <- liftIO readVault
+  c <- SC.getCookie "SessionId"
+  case c of
+   Nothing -> return ""
+   Just v -> do -- Text
+     let session = find (\s -> sessionSid s == T.fromStrict v) vaultContents
+     case session of
+       Nothing -> return ""
+       Just (Session _ _ _ s _) -> return s
+
+
+deleteSession :: Session
+              -> IO ()
+deleteSession s = modifyVault (Data.List.delete s)
+
+-- delete cookie
+logoutSess :: (MonadIO m, ScottyError e)
+           => ActionT e m ()
+logoutSess = do
+  vaultContents <- liftIO readVault
+  c <- SC.getCookie "SessionId"
+  case c of 
+    Nothing -> status internalServerError500
+    Just v -> do
+      let session = find (\lambda -> sessionSid lambda == T.fromStrict v) vaultContents
+      case session of
+        Nothing -> status internalServerError500
+        Just a -> 
+          -- delete session from vaultContents
+          liftIO $ deleteSession a
+      SC.deleteCookie "SessionId"
+            
+
+-- | Check whether a user is authorized, and return the Session that they are authorized for
+--
+-- Example usage:
+--
+-- @
+--    S.get \"\/auth_test\" $ authCheck (redirect \"\/denied\") $
+--      \s -> S.text $ "authorized as " ++ show s
+-- @
+authCheckWithSession :: (MonadIO m, ScottyError e)
+                        => ActionT e m () -- ^ The action to perform if user is denied
+                        -> (Session -> ActionT e m ()) -- ^ The action to perform if user is authorized
+                        -> ActionT e m ()
+authCheckWithSession d a = do
+  vaultContents <- liftIO readVault
+  c <- SC.getCookie "SessionId"
+  case c of
+   Nothing -> d
+   Just v -> do -- Text
+     -- liftIO $ runDB conf $ selectFirst [SessionSid ==. T.fromStrict v] []
+     let session = find (\s -> sessionSid s == T.fromStrict v) vaultContents
+     case session of
+      Nothing ->  d >> status forbidden403
+      Just s -> do let -- s = entityVal e
+                     t = sessionExpiration s
+                   curTime <- liftIO getCurrentTime
+                   if diffUTCTime t curTime > 0
+                     then return s >>= a
+                          -- this shouldnt happen, browser should delete it
+                     else d >> status forbidden403
+
+
+-- now have to sync in-mem db to sqlite db
+insertSession :: T.Text
+              -> T.Text
+              -> Int
+              -> T.Text
+              -> UTCTime
+              -> IO ()
+insertSession sid uname lev salt t = modifyVault (Session sid uname lev salt t :)
+
+runDB :: SessionConfig
+         -> SqlPersistT (NoLoggingT (ResourceT IO)) a
+         -> IO a
+runDB c = runSqlite $ TS.pack $ dbPath c

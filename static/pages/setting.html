@@ -1,0 +1,63 @@
+<blockquote style="margin: 10px auto;">
+  <h4> 設定 • λ 計劃 </h4> 
+</blockquote>
+
+<div class = "row featurette">
+  <div class="col-sm-6">
+<form class="form-horizontal" id = "settingForm" onsubmit="return false;">
+  <fieldset>
+    <legend>Setting</legend>
+    <div id="info-block"> </div>
+    <div class="form-group">
+      <label for="inputEmail" class="col-lg-2 control-label">Email <span class="fa fa-expeditedssl"> </span> </label>
+      <div class="col-lg-10">
+        <input type="text" class="form-control" disabled="" id="inputEmail" placeholder="You cannot change you email">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="inputUsername" class="col-lg-2 control-label">Name <span class="fa fa-expeditedssl"> </span> </label>
+      <div class="col-lg-10">
+        <input type="username" class="form-control" disabled="" id="inputUsername" placeholder="You cannot change your username">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="inputPassword" class="col-lg-2 control-label">Pass(OLD)</label>
+      <div class="col-lg-10">
+        <input type="password" name = "passwor1" class="form-control" id="inputPassword0" placeholder="Password">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="inputPassword" class="col-lg-2 control-label">Pass(NEW)</label>
+      <div class="col-lg-10">
+        <input type="password" name = "passwor2" class="form-control" id="inputPassword1" placeholder="Password">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="inputPassword" class="col-lg-2 control-label">Pass(NEW)</label>
+      <div class="col-lg-10">
+        <input type="password" name = "passwor3" class="form-control" id="inputPassword2" placeholder="Password again">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2 control-label">
+          Subscribe
+      </label>
+      <div class="col-lg-10">
+        <div class="checkbox">
+          <label>
+            <input name="subs" type="checkbox" id="checkbox">
+            Weekly•λ
+          </label>
+        </div>
+      </div>
+    </div>
+     <div class="form-group">
+      <div class="col-lg-10 col-lg-offset-2">
+        <button class="btn btn-primary" onclick="setting();">Submit</button>
+      </div>
+    </div>
+  </fieldset>
+</form>
+</div>
+</div>
+

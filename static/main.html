@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="icon" href="./favicon.ico">
+    
+    <title>Times•λ - Social Information Platform</title>
+
+    <!-- CSS -->
+    <link href="./dist/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+
+    <link href="./dist/magnific-popup/magnific-popup.css" rel="stylesheet"/>
+
+    <link href="./dist/css/creative.min.css" rel="stylesheet"/>
+
+    <link href="./map/dist/jqvmap.css" media="screen" rel="stylesheet" type="text/css"/>
+
+    <!-- font -->
+    <script src="https://use.fontawesome.com/e0d8938e01.js"></script>
+
+    <!-- Share -->
+    <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials.css" />
+    
+    <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials-theme-flat.css" /> 
+
+
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom styles for this site -->
+    <style name = "custimized style" type="text/css">
+      .nav-tabs {
+       
+        margin-bottom: 5px;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+
+  <body id="page-top">
+    
+    <!-- NAVBAR ================================================== -->
+    <nav id="mainNav" class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#page-top"><span class="fa fa-diamond"></span> Times•λ</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="collapse-1">
+          <ul id = "navbar-ul" class="nav navbar-nav">
+            %s
+            <li><a style="cursor: pointer;" data-toggle="modal" data-target="#submitModal">
+                  <span class="fa fa-pencil-square-o"></span> Submit</a>
+            </li>
+          </ul>
+
+          <form id = "searchf" class="navbar-form navbar-left" role="search" onsubmit="return false;">
+            <div class="form-group">
+              <input type="text" name = "keyword" class="form-control-s" placeholder="Search">
+            </div>
+            <button id="searchbtn" type="submit" class="btn btn-default" onclick="search();">
+              <span class="fa fa-search"></span> Search
+            </button>
+          </form>
+
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a id="usermenu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                <span class="fa fa-user-circle-o"></span> Menu <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#" onclick="setPage();"><span class="fa fa-cog fa-spin"></span> Setting</a></li>
+                <li><a href="#" onclick="dashPage();"><span class="fa fa-tachometer"></span> Dashboard</a></li>
+                <li><a href="#" onclick="chatRoom();"><span class="fa fa-commenting"></span> Chatroom</a></li>
+                <li class="divider"></li>
+                <li id="logout"><a href="#"><span class="fa fa-sign-out"></span> Sign out</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Submit modal
+    ================================================== -->
+
+    <div class="modal fade" id="submitModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title" id="myModalLabel" align="center">
+              Submit NEWS
+            </h4>
+          </div>
+          <div id = "alert-info"> </div>
+          <div id = "alert-info2"> </div>
+          <div class="modal-body">
+            <form id = "submitn" class="form-horizontal" onsubmit="return false;">
+              <fieldset>
+                <div class="form-group">
+                  <label for="inputTitle" class="col-lg-2 control-label">
+                    TITLE <span class="fa fa-header"/>
+                  </label>
+                  <div class="col-lg-10">
+                    <input name="title" type="text" class="form-control" id="inputTitle" placeholder="Title">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="inputURL" class="col-lg-2 control-label">URL
+                    <span class="fa fa-link"/>
+                  </label>
+                  <div class="col-lg-10">
+                    <input name="url" type="text" class="form-control" id="inputURL" placeholder="URL, leave this form blank for asking">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="inputURL" class="col-lg-2 control-label">PIC
+                    <span class="fa fa-camera-retro"/>
+                  </label>
+                  <div class="col-lg-10">
+                    <input name="img" type="text" class="form-control" id="inputURL" placeholder="Link of title picture(optional)">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="textArea" class="col-lg-2 control-label">INTRO
+                    <span class="fa fa-keyboard-o"/>
+                  </label>
+                  <div class="col-lg-10">
+                    <textarea name="text" type="text" class="form-control" rows="5" id="textArea" 
+                      placeholder="Optional" style="resize: none;"></textarea>
+                    <span class="help-block">Introduction for your submit, up to 140 words</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-lg-2 control-label">LINE
+                    <span class="fa fa-hand-pointer-o fa-spin"/>
+                  </label>
+                  <div class="col-lg-10">
+                    <div class="radio">
+                      <label>
+                        <input name="radios" type="radio" id="optionsRadios1" value="1" checked="">
+                          World Line - IT/Tech NEWS
+                      </label>
+                    </div>
+
+                    <div class="radio">
+                      <label>
+                        <input name="radios" type="radio" id="optionsRadios3" value="3">
+                          Beta Line - for Academic works
+                      </label>
+                    </div>
+
+                    <div class="radio">
+                      <label>
+                        <input name="radios" type="radio" id="optionsRadios2" value="2">
+                          Alpha Line - for Asking
+                      </label>
+                    </div>
+
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <div class="col-lg-10 col-lg-offset-2">
+                    <button type="cancel" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button id="submitbtn" type="submit" class="btn btn-primary" onclick="submitnews();" >Submit</button>
+                  </div>
+                </div>
+
+              </fieldset>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carousel
+    ================================================== -->
+
+    <div class="modal fade" id="carModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title" id="myModalLabel">Introduction</h4>
+          </div>
+          <div class="modal-body" style='overflow: auto; height: 450px;'>
+            <p>
+              <h4>Rule</h4>
+              1. 在合适的世界线发布， 工业界(产业界)内容发布于World，学术界内容发布于Beta，询问发布于Alpha<br>
+              2. 禁止发布恐吓，诽谤，反政府，恐怖主义，色情，歧视等具备争议性，负面或不法内容 <br>
+              3. 禁止发布广告，非相关资讯(如：菜市场的苹果10块钱3斤) <br>
+              4. 个人展示的内容请自觉添加前缀：「SHOW:」 <br>
+              5. 发布信息时请填写正确的url信息 <br>
+              6. 用户有完善军规的权利 <br>
+              <br>
+              <small>「本平台对以上条款拥有最终解释权」</small>
+              <br><br>
+              <h4>Instruction</h4>
+              1. 主体功能均在导航栏，用户可以submit一条新闻，检索新闻（parse 新闻的title和intro）<br>
+              2. 在Menu菜单，用户可以设置账户-setting、管理发布与收藏、查看统计信息、进行圆桌会议<br>
+              3. 在主页新闻列表，每当你点开一个手风琴表单，里面会有一副图片(可选)，一段介绍（可选）以及四个按钮，
+                 这四个按钮分别是点赞，打开新闻源链接，对新闻进行讨论和收藏<br>
+              NOTE:每个功能都经过思考和精心设计，用户凭借直觉就能操作。其中最重要的功能分别是：<b>发布，检索，打开链接和评论</b>。使用评论需要挂载VPN<br>
+              <h4>Rank</h4>
+              All列表按时间排序。Top列表使用了基于Hacker News的排序算法，在其基础上做出了改动，排序权重满足如下曲线族：<br>
+              <img src="./img/rank.jpg" style="width:400px;"/>
+              <h4>Level</h4>
+              仅供娱乐：<br>
+              冻结 <br>
+              新人: 情报Hacker  <br>
+              VIP: 特A级Hacker(Chatroom权限) <br>
+              管理员 <br>
+              <h4>QA</h4>
+              1. 为什么点赞不可逆？答：点赞功能十分重要，决定了新闻的排序，
+              所以其被隐藏在手风琴内部，这就大大减少了因为手滑错点的情况，设计被简化，从而无需逆操作 <br>
+              2. 为什么不能踩？答：「恶意规避」<br>
+              3. 怎么取消收藏？答：在dashboard页面 <br>
+              4. 有没有私信功能？答：后台其实已经实现，但是经过研究发现私信使用率极低属于鸡肋功能，可能不会面世 <br>
+              5. 如何举报违规信息？答：In progress <br>
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <header>
+      <div class="header-content">
+            <div class="header-content-inner">
+                <h1 id="homeHeading">Social Information Platform</h1>
+                <hr>
+                <p>Following the rules is the only way to construct a favorable public environment.</p>
+                <a data-toggle="modal" data-target="#carModal1" class="btn btn-primary btn-xl">Introduction</a>
+            </div>
+        </div>
+    </header>
+        
+    <!-- Marketing messaging and featurettes
+      ================================================== -->
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+
+    <div name = "main-frame" id = "main_frame">
+      <section>
+        <div id = "world" class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2 class="section-heading">World</h2>
+                    <hr class="primary">
+                </div>
+            </div>
+          <div name = "main-frame-1" id = "main_frame_1">
+          </div>
+        </div>
+      </section>
+
+        <!-- Ads here -->
+      <section class="no-padding" id="portfolio">
+        <div class="container-fluid">
+            <div class="row no-gutter popup-gallery">
+                <div class="col-lg-4 col-sm-6">
+                    <a href="img/portfolio/fullsize/4.jpg" class="portfolio-box">
+                        <img src="img/portfolio/thumbnails/4.jpg" class="img-responsive" alt="">
+                        <div class="portfolio-box-caption">
+                            <div class="portfolio-box-caption-content">
+                                <div class="project-category text-faded">
+                                    Category
+                                </div>
+                                <div class="project-name">
+                                    Project Name
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4 col-sm-6">
+                    <a href="img/portfolio/fullsize/5.jpg" class="portfolio-box">
+                        <img src="img/portfolio/thumbnails/5.jpg" class="img-responsive" alt="">
+                        <div class="portfolio-box-caption">
+                            <div class="portfolio-box-caption-content">
+                                <div class="project-category text-faded">
+                                    Category
+                                </div>
+                                <div class="project-name">
+                                    Project Name
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4 col-sm-6">
+                    <a href="img/portfolio/fullsize/6.jpg" class="portfolio-box">
+                        <img src="img/portfolio/thumbnails/6.jpg" class="img-responsive" alt="">
+                        <div class="portfolio-box-caption">
+                            <div class="portfolio-box-caption-content">
+                                <div class="project-category text-faded">
+                                    Category
+                                </div>
+                                <div class="project-name">
+                                    Project Name
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+      </section>
+      <aside class="bg-dark">
+        <div class="container text-center">
+            <div class="call-to-action">
+                <h2>Some Ads</h2>
+                <a onclick="alert('Please email us');" class="btn btn-default btn-xl sr-button"> Opportunity</a>
+            </div>
+        </div>
+      </aside>
+
+      <section>
+        <div id = "beta" class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2 class="section-heading">Beta for Academic</h2>
+                    <hr class="primary">
+                </div>
+            </div>
+          <div  name = "main-frame-2" id = "main_frame_2">
+          </div>
+        </div>
+      </section>
+
+        <!-- Ads here -->
+
+      <section class="no-padding" id="portfolio">
+        <div class="container-fluid">
+            <div class="row no-gutter popup-gallery">
+                <div class="col-lg-4 col-sm-6">
+                    <a href="img/portfolio/fullsize/1.jpg" class="portfolio-box">
+                        <img src="img/portfolio/thumbnails/1.jpg" class="img-responsive" alt="">
+                        <div class="portfolio-box-caption">
+                            <div class="portfolio-box-caption-content">
+                                <div class="project-category text-faded">
+                                    Category
+                                </div>
+                                <div class="project-name">
+                                    Project Name
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4 col-sm-6">
+                    <a href="img/portfolio/fullsize/2.jpg" class="portfolio-box">
+                        <img src="img/portfolio/thumbnails/2.jpg" class="img-responsive" alt="">
+                        <div class="portfolio-box-caption">
+                            <div class="portfolio-box-caption-content">
+                                <div class="project-category text-faded">
+                                    Category
+                                </div>
+                                <div class="project-name">
+                                    Project Name
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4 col-sm-6">
+                    <a href="img/portfolio/fullsize/3.jpg" class="portfolio-box">
+                        <img src="img/portfolio/thumbnails/3.jpg" class="img-responsive" alt="">
+                        <div class="portfolio-box-caption">
+                            <div class="portfolio-box-caption-content">
+                                <div class="project-category text-faded">
+                                    Category
+                                </div>
+                                <div class="project-name">
+                                    Project Name
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+      </section>
+      <aside class="bg-dark">
+        <div class="container text-center">
+            <div class="call-to-action">
+                <h2>Some Ads again</h2>
+                <a onclick="alert('Please email us');" class="btn btn-default btn-xl sr-button"> Opportunity</a>
+            </div>
+        </div>
+      </aside>
+
+      <section>
+        <div id = "alpha" class="container ">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2 class="section-heading">Alpha for Ask</h2>
+                    <hr class="primary">
+                </div>
+            </div>
+          <div  name = "main-frame-3" id = "main_frame_3">
+          </div>
+        </div>
+      </section>
+
+      </div>
+    
+
+    <div class="container" id = "chat_start">
+      <div name = "chat-frame" id = "chat_frame" style="display: none;">
+      </div>
+    </div>
+
+    <div class="container" id = "menu_start">
+      <div name = "menu-frame" id = "menu_frame" style="display: none;">
+      </div>
+    </div>
+
+    <div class="container" id = "disqus_start">
+      <div name = "disqus" id = "disqus_frame" style="display: none;">
+        <div id = "disqusHead">
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div id="disqus_thread"></div>
+            </div> 
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container ">
+
+      <!-- START THE FEATURETTES -->
+      <hr class="featurette-divider">
+      <!-- /END THE FEATURETTES -->
+
+      <!-- FOOTER -->
+      <footer>
+        <p class="pull-right"><a href="#"><span class="fa fa-angle-double-up"></span> Back to top</a></p>
+        <p>© 2017 Project λ. · <a href="/#" onclick="aboutPage();">About</a>
+          <br>
+            Powered by 
+            <a href="https://www.haskell.org">Haskell</a> ·
+            <a href="https://www.postgresql.org">PostgreSQL</a>  ·
+            <a href="http://getbootstrap.com">Bootstrap</a> ·
+            <a href="http://fontawesome.io">Font Awesome</a>
+            <br>
+            <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span class="site-uv">
+              <span class="fa fa-user"></span> 
+              <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+            </span> ·
+            <span class="site-pv">
+              <span class="fa fa-eye"></span> 
+              <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+            </span> ·
+            <span class="fa fa-wifi"></span> 
+            %d
+        </p>
+      </footer>
+
+    </div><!-- /.container -->
+
+    <!-- Bootstrap core JavaScript
+      ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+        
+    <script src="./dist/bootstrap/js/jquery.js"></script>
+    <script>
+      var disqus_shortname = 'timeslambda';
+  
+      (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <script src="./dist/bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <script src="dist/scrollreveal/scrollreveal.min.js"></script>
+    <script src="dist/magnific-popup/jquery.magnific-popup.min.js"></script>
+    <script src="dist/js/creative.min.js"></script>
+    %s
+    <script type="text/JavaScript" src="./js/chat.js"></script>
+    <script type="text/javascript" src="./dist/map/js/data.js"></script>
+    <script type="text/javascript" src="./dist/map/dist/jquery.vmap.js"></script>
+    <script type="text/javascript" src="./dist/map/dist/maps/jquery.vmap.world.js" charset="utf-8"></script>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials.min.js"></script>
+    
+  </body>
+</html>
