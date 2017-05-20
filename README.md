@@ -1,12 +1,12 @@
-##Introduction
+##Introduction##
 
 A Hacker-News-like social information platform focusing on IT industry and computer science, which users could publish general news, academic contents and questions through it. Reducing time wasting on nonnutritive information is the major goal
 
-##Version 
+##Version##
 
 0.28
 
-##First Launch
+##First Launch##
 
 Please configure following settings before your first launch:
 
@@ -16,6 +16,6 @@ Please configure following settings before your first launch:
 
 3. Put dist of ProLambda/Times-default-theme into static folder
 
-##Demo
+##Demo##
 
 http://sapphiresoft.io
