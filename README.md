@@ -1,6 +1,6 @@
 ### Introduction ###
 
-A Hacker-News-like social information platform focusing on IT industry and computer science, which users could publish general news, academic contents and questions through it. Reducing time wasting on nonnutritive information is the major goal
+A Hacker-News-like social information platform written in Haskell, focusing on IT industry and computer science, which users could publish general news, academic contents and questions through it. Reducing time wasting on nonnutritive information is the major goal
 
 ### Version ###
 
