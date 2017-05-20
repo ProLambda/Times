@@ -4,7 +4,7 @@ A Hacker-News-like social information platform focusing on IT industry and compu
 
 ### Version ###
 
-0.28
+0.2.8
 
 ### First Launch ###
 
