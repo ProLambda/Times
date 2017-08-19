@@ -18,4 +18,8 @@ Please configure following settings before your first launch:
 
 ### Demo ###
 
+![](https://github.com/ProLambda/Times/blob/master/submit.gif?raw=true)
+
+![](https://github.com/ProLambda/Times/blob/master/view.gif?raw=true)
+
 http://sapphiresoft.io
