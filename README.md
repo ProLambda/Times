@@ -8,4 +8,10 @@ Please configure following settings before your first launch:
 
 3. Put dist of ProLambda/Times-default-theme into static folder
 
+Demo:
+
+![](./submit.gif)
+
+![](./view.gif)
+
 Demo: http://sapphiresoft.io
