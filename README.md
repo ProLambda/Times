@@ -28,4 +28,4 @@ Please configure following settings before your first launch:
 
 #### Demo on Youtube ####
 
-[Click Here]()
+[Click Here](https://www.youtube.com/watch?v=ZJfdvKRax1Q)
