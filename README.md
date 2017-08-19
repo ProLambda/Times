@@ -18,8 +18,4 @@ Please configure following settings before your first launch:
 
 ### Demo ###
 
-<<<<<<< HEAD
 http://sapphiresoft.io
-=======
-http://sapphiresoft.io
->>>>>>> master
