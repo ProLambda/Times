@@ -36,4 +36,11 @@ http://sapphiresoft.io
 >>>>>>> master
 =======
 [Click Here](https://www.youtube.com/watch?v=ZJfdvKRax1Q)
+<<<<<<< HEAD
+>>>>>>> master
+=======
+
+### Design ###
+
+![](https://github.com/ProLambda/Times/blob/master/lambda-design.png?raw=true)
 >>>>>>> master
