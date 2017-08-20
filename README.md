@@ -18,9 +18,6 @@ Please configure following settings before your first launch:
 
 ### Demo ###
 
-<<<<<<< HEAD
-http://sapphiresoft.io
-=======
 #### Submit ####
 
 ![](https://github.com/ProLambda/Times/blob/master/submit.gif?raw=true)
@@ -31,16 +28,8 @@ http://sapphiresoft.io
 
 #### Full Demo on Youtube ####
 
-<<<<<<< HEAD
-[Click Here]()
->>>>>>> master
-=======
 [Click Here](https://www.youtube.com/watch?v=ZJfdvKRax1Q)
-<<<<<<< HEAD
->>>>>>> master
-=======
 
 ### Design ###
 
 ![](https://github.com/ProLambda/Times/blob/master/lambda-design.png?raw=true)
->>>>>>> master
