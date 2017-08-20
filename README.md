@@ -26,6 +26,6 @@ Please configure following settings before your first launch:
 
 ![](https://github.com/ProLambda/Times/blob/master/view.gif?raw=true)
 
-#### Demo on Youtube ####
+#### Full Demo on Youtube ####
 
 [Click Here](https://www.youtube.com/watch?v=ZJfdvKRax1Q)
