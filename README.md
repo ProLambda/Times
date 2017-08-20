@@ -29,3 +29,7 @@ Please configure following settings before your first launch:
 #### Full Demo on Youtube ####
 
 [Click Here](https://www.youtube.com/watch?v=ZJfdvKRax1Q)
+
+### Design ###
+
+![](https://github.com/ProLambda/Times/blob/master/lambda-design.png?raw=true)
