@@ -29,7 +29,7 @@ http://sapphiresoft.io
 
 ![](https://github.com/ProLambda/Times/blob/master/view.gif?raw=true)
 
-#### Demo on Youtube ####
+#### Full Demo on Youtube ####
 
 <<<<<<< HEAD
 [Click Here]()
