@@ -20,6 +20,8 @@ Please configure following settings before your first launch:
 
 3. Put dist of ProLambda/Times-default-theme into static folder
 
+4. `$ stack build` 
+
 ### Demo ###
 
 #### Submit ####
