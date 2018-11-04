@@ -389,7 +389,7 @@ submitnews cache@(w, b, a) (w', b', a') =
                     text "ok200"
                     modifyStat country
                     text'' <- liftIO buildMap
-                    liftIO $ writeFile "./static/map/js/data.js" text''
+                    liftIO $ writeFile "./static/dist/map/js/data.js" text''
 
 
 -- serve logout

@@ -1,5 +1,5 @@
 var chat_setup = 0;
-var country = "";
+var country = "CN";
 var starpost0 = function(pageid, line) {
     var op = 1;
     var status ='/world';
@@ -72,7 +72,7 @@ String.format = function(format) {
 };
 
 $(function () { 
-    jQuery.get("http://ipinfo.io/", function (response)
+    jQuery.get("https://ipinfo.io/", function (response)
     {
         country = response.country;
     }, "jsonp");
@@ -84,7 +84,6 @@ $(function () {
         $("#main_frame_1").html(data[0]); 
         $("#main_frame_2").html(data[1]); 
         $("#main_frame_3").html(data[2]); 
-        DISQUSWIDGETS.getCount({reset: true});
     });
 });
 
@@ -443,13 +442,16 @@ var setting = function() {
         var renderHtml2 = `<div class='alert alert-dismissible alert-success'>
             <button type='button' class='close' data-dismiss='alert'>&times;</button>
             <strong>Cong!</strong> `
-        if(data == "Success")
+
+        if(data == "success"){
             $("#info-block").html(renderHtml2 + "Success!" + '</div>');
             if(sub >= 0 && sub <= 1) subscr = !subscr;
-        else if (data == '')
+        }else if (data == ''){
             $("#info-block").html(renderHtml1 + 'Nothing to do!' + '</div>');
-        else
+        }else{
             $("#info-block").html(renderHtml1 + data + '</div>');
+        }
+
         $('#inputPassword0').val('');
         $('#inputPassword1').val('');
         $('#inputPassword2').val('');
