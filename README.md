@@ -20,20 +20,19 @@ Please configure following settings before your first launch:
 
 3. Put dist of ProLambda/Times-default-theme into static folder
 
-4. main :: IO ()
+4. -- initializeStatDb
 
-   main = do
-   
-   -- initializeStatDb
    -- initializeNewsDb
+   
    -- setLevel "xxx" 12 (+1)
-   uncomment up 3 lines and then 
+   
+   uncomment up 3 lines in Main.hs, this is necessary init step, then do following
    ```
    $stack build
    $stack exec proj
    ```
 
-4. `$stack build` 
+5. Comment all 3 lines in step4 and then `$stack build` again
 
 ### Demo ###
 
