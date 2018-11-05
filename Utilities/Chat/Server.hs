@@ -67,10 +67,11 @@ broadcast message clients = do
 chatroom :: IO ()
 chatroom = do
   print "Chatroom Server start..."
-  
+
   state <- newMVar newServerState
   msgcache <- newMVar newMsgCache
   WS.runServer "0.0.0.0" 9000 $ application msgcache state
+
 
 application :: MVar MsgCache
             -> MVar ServerState
