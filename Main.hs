@@ -25,6 +25,7 @@ import  Skeleton.Kernel.Internal.Type
 import  Skeleton.Shell.Template
 -- import Utilities.Msg.Mailbox
 -- import  Skeleton.Kernel.Map
+-- import  Skeleton.Kernel.Account
 
 -- prepare session configuration
 config :: SessionConfig
@@ -97,6 +98,7 @@ main :: IO ()
 main = do
   -- initializeStatDb
   -- initializeNewsDb
+  -- setLevel "xxx" 12 (+1)
   
   -- cache begin
   w    <- worldInit
