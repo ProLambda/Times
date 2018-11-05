@@ -1,5 +1,3 @@
-**Every fork can change the GPL license to other**
-
 ### Introduction ###
 
 A Hacker-News-like social information platform written in Haskell, focusing on IT industry and computer science, which users could publish general news, academic contents and questions through it. Reducing time wasting on nonnutritive information is the major goal
@@ -26,7 +24,7 @@ Please configure following settings before your first launch:
 
    -- initializeNewsDb
    
-   -- setLevel "xxx" 12 (+1) -- "xxx" could be any registered user, this step is for setting super admin
+   -- setLevel "xxx" 12 (+1) -- "xxx" could be any registered user, for setting super admin, can be run when has at least one user
    
    uncomment up 3 lines in Main.hs, this is necessary init step, then do following
    ```
