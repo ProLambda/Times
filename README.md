@@ -5,6 +5,7 @@
 A Hacker-News-like social information platform written in Haskell, focusing on IT industry and computer science, which users could publish general news, academic contents and questions through it. Reducing time wasting on nonnutritive information is the major goal
 
 [Demo](http://ec2-18-182-66-26.ap-northeast-1.compute.amazonaws.com)
+
 [Chinese blog article](http://izhen.me/2017/08/20/aws-lambda/)
 
 ### Version ###
