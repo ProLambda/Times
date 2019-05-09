@@ -1,4 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE EmptyDataDecls             #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE GADTs                      #-}
@@ -6,6 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses      #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE QuasiQuotes                #-}
+{-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 
@@ -15,17 +15,17 @@ module Skeleton.Kernel.Map (
        , buildMap
        ) where
 
-import  Skeleton.Kernel.Internal.Model
+import           Skeleton.Kernel.Internal.Model
 
-import  Control.Monad.Logger
-import  Control.Monad.IO.Class
-import  Database.Persist
-import  Database.Persist.Postgresql
-import  Web.Scotty                       (ActionM)
+import           Control.Monad.IO.Class
+import           Control.Monad.Logger
+import           Database.Persist
+import           Database.Persist.Postgresql
+import           Web.Scotty                     (ActionM)
 
 -- must be called before scotty
 initializeStatDb :: IO ()
-initializeStatDb = 
+initializeStatDb =
   runStdoutLoggingT $ withPostgresqlPool connStr 10 $ \pool ->
     liftIO $ flip runSqlPersistMPool pool $ do
       runMigration migrateAll
@@ -70,7 +70,7 @@ ca (Country _ _ _ _ _ _ _ _ _ _ x _) = x
 -------------------------------------------------------------
 
 modifyStat :: String
-           -> ActionM ()
+           -> IO ()
 modifyStat cou =
   runStdoutLoggingT $ withPostgresqlPool connStr 10 $ \pool ->
     liftIO $ flip runSqlPersistMPool pool $ do
@@ -91,9 +91,9 @@ modifyStat cou =
                "MO" -> update uid [CountryMo =. (+1) (mo stat)]
                "AU" -> update uid [CountryAu =. (+1) (au stat)]
                "NZ" -> update uid [CountryNz =. (+1) (nz stat)]
-               "CA" -> update uid [CountryCa =. (+1) (ca stat)]           
-               _ -> return ()
-             
+               "CA" -> update uid [CountryCa =. (+1) (ca stat)]
+               _    -> return ()
+
 
 w :: (Country -> Int)
   -> Country
@@ -126,4 +126,4 @@ buildMap = do
               nz' = ",\"nz\":" ++ (w nz stat) ++ au'
               ca' = "\"ca\":"  ++ (w ca stat) ++ nz'
           return $ jsw ca'
-        
+

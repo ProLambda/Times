@@ -25,29 +25,29 @@ module Skeleton.Home
          , union
        ) where
 
-import  qualified Data.Text.Lazy  as T
-import  qualified Data.Text       as TS
+import qualified Data.Text                     as TS
+import qualified Data.Text.Lazy                as T
 
-import  Web.Scotty
-import  Skeleton.Kernel.Account         
-import  Utilities.Login.Session
-import  Skeleton.Kernel.Post
-import  Skeleton.Shell.Template
-import  Database.Persist                   hiding (get)
-import  Control.Monad.IO.Class
-import  Control.Monad                      (when)
-import  Skeleton.Kernel.Core.Helper
+import           Control.Monad                 (when)
+import           Control.Monad.IO.Class
+import           Database.Persist              hiding (get)
+import           Skeleton.Kernel.Account
+import           Skeleton.Kernel.Core.Helper
+import           Skeleton.Kernel.Post
+import           Skeleton.Shell.Template
+import           Utilities.Login.Session
+import           Web.Scotty
 
-import  Data.Time.Clock
-import  Data.Char
-import  Prelude                            hiding (id)
-import  Skeleton.Kernel.Map               
+import           Data.Char
+import           Data.Time.Clock
+import           Prelude                       hiding (id)
+import           Skeleton.Kernel.Map
 
-import  Skeleton.Kernel.Core.Cache
-import  Skeleton.Kernel.Core.Secure
-import  Skeleton.Kernel.Internal.Type
-import  Control.Concurrent                 (MVar, readMVar, forkIO)
-import  Web.Scotty.Cookie
+import           Control.Concurrent            (MVar, forkIO, readMVar)
+import           Skeleton.Kernel.Core.Cache
+import           Skeleton.Kernel.Core.Secure
+import           Skeleton.Kernel.Internal.Type
+import           Web.Scotty.Cookie
 
 -------------------------------------------------------------
 -- helper cache -- refresh cache or not
@@ -101,12 +101,12 @@ beta b = get "/beta" $ do
          html web
 
 about :: ScottyM ()
-about = get "/about" $ 
+about = get "/about" $
   file "./static/pages/about.html"
 
 -- serve main page
 home :: ScottyM ()
-home = 
+home =
   get "/" $ authCheck (redirect "/login") $ do
     texts     <- liftIO $ readFile "./static/main.html"
     onlinenum <- getOnlineNum  -- number of people online
@@ -122,11 +122,11 @@ disqus = get "/disqus" $ do --login auth
                     "w" -> 1
                     "a" -> 2
                     "b" -> 3
-                    _  -> 0
-           one <- liftIO $ getOneNews op uid 
+                    _   -> 0
+           one <- liftIO $ getOneNews op uid
            renderDis text1 text2 one
 
-    
+
 search :: ScottyM ()
 search = get "/search" $ authCheck (text "/login") $ do
   (key :: String) <- param "keyword"
@@ -140,7 +140,7 @@ chat = get "/chat" $ authCheck (text "/login") $ do
           text' <- liftIO $ readFile "./static/pages/chat.html"
           json [text', name]
      else json ["no" :: String, ""]
-  
+
 
 purify :: (MVar CacheList, MVar CacheList, MVar CacheList)
        -> (MVar PageCache, MVar PageCache, MVar PageCache)
@@ -217,7 +217,7 @@ illegal email name = if length email < 6 || length name < 6
 
 
 signup :: ScottyM ()
-signup = 
+signup =
   post "/signup" $ do
     (email    :: String) <- param "mail"
     (username :: String) <- param "username"
@@ -234,7 +234,7 @@ signup =
                       1 -> text "user exists!"
                       2 -> text "email have been used!"
                       _ -> do
-                        addUser (T.pack email) (T.pack username) (T.pack passwor1)
+                        liftIO $ addUser (T.pack email) (T.pack username) (T.pack passwor1)
                         text "success"
 
 
@@ -261,13 +261,13 @@ setting = do
     when (subscr == 0 || subscr == 1) $ do
       liftIO . setSubscr $ T.pack v
       text "success"
-    when (subscr == 1 || subscr == 2) $ 
+    when (subscr == 1 || subscr == 2) $
       if passwor2 /= passwor3 || passwor1 == passwor2
          then text "illegal password! please check carefully!"
          else do
               getuser <- liftIO (authUser v)
               case getuser of
-                Nothing -> text "/login" 
+                Nothing -> text "/login"
                 Just (Entity _ value) -> do
                   salt <- getSalt
                   if authPass value salt (T.pack passwor1)
@@ -280,7 +280,7 @@ setting = do
 starpost :: (MVar CacheList, MVar CacheList, MVar CacheList)
          -> (MVar PageCache, MVar PageCache, MVar PageCache)
          -> ScottyM ()
-starpost cache page = 
+starpost cache page =
   post "/starpost" $ authCheck (text "please login") $ do
     (pid    :: String) <- param "starpost"
     (op     :: Int)    <- param "line"
@@ -291,7 +291,7 @@ starpost cache page =
     if ifUnique
        then do
          _ <- liftIO $ forkIO $ updateStarCount author >>
-                                updateStarPost  (T.pack pid) v 
+                                updateStarPost  (T.pack pid) v
          _ <- liftIO $ forkIO $ modifyNews op (T.pack pid)
          liftIO $ helperStar pid op cache
          liftIO $ helperRender (T.pack pid) op cache page inCache
@@ -300,7 +300,7 @@ starpost cache page =
 
 
 flagpost :: ScottyM ()
-flagpost = 
+flagpost =
   post "/flagpost" $ authCheck (text "please login") $ do
     (title :: String) <- param "title"
     (url :: String)   <- param "url"
@@ -323,7 +323,7 @@ flagpost =
 deletepost :: (MVar CacheList, MVar CacheList, MVar CacheList)
            -> (MVar PageCache, MVar PageCache, MVar PageCache)
            -> ScottyM ()
-deletepost cache page = 
+deletepost cache page =
   post "/delete" $ authCheck (text "/login") $ do
     (pid :: String) <- param "deletepost"
     (op :: Int) <- param "line"
@@ -344,7 +344,7 @@ deletepost cache page =
 submitnews :: (MVar CacheList, MVar CacheList, MVar CacheList)
            -> (MVar PageCache, MVar PageCache, MVar PageCache)
            -> ScottyM ()
-submitnews cache@(w, b, a) (w', b', a') = 
+submitnews cache@(w, b, a) (w', b', a') =
   post "/submitnews" $ authCheck (redirect "/login") $ do
     (title   :: String) <- param "title"
     (rawurl  :: String) <- param "url"
@@ -377,17 +377,17 @@ submitnews cache@(w, b, a) (w', b', a') =
             urlReq <- liftIO $ runReq $ urlWrapper url
             if not (urlCheck (fst urlReq))
                then text "illegal url!"
-               else do 
+               else do
                     idValue <- liftIO $ updateNewsCount radios
                     let p = map T.pack [title, fst urlReq, snd urlReq, img]
-                    insertNews radios v
+                    liftIO $ insertNews radios v
                                (head p) (p !! 1) (p !! 2) (p !! 3)
                                (T.pack $ renderPlainText intro)
                                idValue
                                cache
                     liftIO $ renderCacheNow xs op ys
                     text "ok200"
-                    modifyStat country
+                    liftIO $ modifyStat country
                     text'' <- liftIO buildMap
                     liftIO $ writeFile "./static/dist/map/js/data.js" text''
 
@@ -395,7 +395,7 @@ submitnews cache@(w, b, a) (w', b', a') =
 -- serve logout
 logout :: ScottyM ()
 logout = get "/logout" $ do
-    logoutSess 
+    logoutSess
     text "ok200"
 
 

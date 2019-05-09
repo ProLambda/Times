@@ -1,4 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE EmptyDataDecls             #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE GADTs                      #-}
@@ -6,6 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses      #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE QuasiQuotes                #-}
+{-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 
@@ -34,17 +34,17 @@ module Skeleton.Kernel.Account (
        , getUserById
        ) where
 
-import qualified Data.Text.Lazy as T
+import qualified Data.Text.Lazy                 as T
 
-import  Skeleton.Kernel.Internal.Model
-import  Skeleton.Kernel.PostHelper     
-import  Control.Monad.IO.Class
-import  Database.Persist
-import  Database.Persist.Postgresql
-import  Control.Monad.Logger
-import  Web.Scotty                        (ActionM)
-import  Data.Time.Clock
-import  Prelude                           hiding (id)
+import           Control.Monad.IO.Class
+import           Control.Monad.Logger
+import           Data.Time.Clock
+import           Database.Persist
+import           Database.Persist.Postgresql
+import           Prelude                        hiding (id)
+import           Skeleton.Kernel.Internal.Model
+import           Skeleton.Kernel.PostHelper
+import           Web.Scotty                     (ActionM)
 
 
 authUser :: String
@@ -55,7 +55,7 @@ authUser user =
       printMigration migrateAll
       selectFirst [UserUsername ==. (T.pack user)] []
 
-      
+
 -------------------------------------------------------------
 -- add new user
 -------------------------------------------------------------
@@ -79,7 +79,7 @@ checkNoUser s m =
 addUser :: T.Text   -- email
         -> T.Text   -- username
         -> T.Text   -- password
-        -> ActionM ()
+        -> IO ()
 addUser mail user pass =
   runStdoutLoggingT $ withPostgresqlPool connStr 10 $ \pool ->
     liftIO $ flip runSqlPersistMPool pool $ do
@@ -97,7 +97,7 @@ resetPass pass name =
       runMigration migrateAll
       maybeEle <- getBy $ UniqueUsername name
       case maybeEle of
-        Nothing -> return ()
+        Nothing            -> return ()
         Just (Entity id _) -> update id [UserPassword =. pass]
 
 
@@ -108,7 +108,7 @@ getUser ifadmin =
     liftIO $ flip runSqlPersistMPool pool $ do
       runMigration migrateAll
       selectList [UserLevel <. ifadmin] []
-              
+
 
 
 getLevel :: T.Text
@@ -119,7 +119,7 @@ getLevel name =
       runMigration migrateAll
       maybeEle <- getBy $ UniqueUsername name
       case maybeEle of
-        Nothing -> return (-1)
+        Nothing                            -> return (-1)
         Just (Entity _ (User _ _ _ _ l _)) -> return l
 
 
@@ -160,7 +160,7 @@ updateStarCount name =
           return ()
         where
           getstar (User _ _ _ s _ _) = s
-          
+
 
 updateUserPost :: UTCTime
                -> T.Text
@@ -193,7 +193,7 @@ checkNoFlag pid u =
         Just (Entity uid _) -> do
           s <- selectList [FlagPostPageId ==. pid, FlagPostUserId ==. uid] []
           return (if (length s) > 0 then False else True)
-    
+
 
 updateFlagPost :: UTCTime
                -> T.Text
@@ -209,14 +209,14 @@ updateFlagPost time title url page author =
       case maybeEle of
           Nothing -> return ()
           Just (Entity uid _) -> do
-               insert $ FlagPost time title url page uid 
+               insert $ FlagPost time title url page uid
                return ()
 
 
 checkNoStar :: T.Text
             -> T.Text
             -> IO Bool
-checkNoStar pid u = 
+checkNoStar pid u =
   runStdoutLoggingT $ withPostgresqlPool connStr 10 $ \pool ->
     liftIO $ flip runSqlPersistMPool pool $ do
       runMigration migrateAll
@@ -241,7 +241,7 @@ updateStarPost pid author =
           Just (Entity uid _) -> do
                insert $ StarPost pid uid
                return ()
-               
+
 
 getNews :: T.Text
         -> IO [Entity NewsPost]
@@ -252,7 +252,7 @@ getNews name =
       maybeEle <- getBy $ UniqueUsername name
       case maybeEle of
         Nothing -> return []
-        Just (Entity uid _) -> 
+        Just (Entity uid _) ->
              selectList [NewsPostAuthorId ==. uid] []
 
 
@@ -265,7 +265,7 @@ getFlag name =
       maybeEle <- getBy $ UniqueUsername name
       case maybeEle of
         Nothing -> return []
-        Just (Entity uid _) -> 
+        Just (Entity uid _) ->
              selectList [FlagPostUserId ==. uid] []
 
 
@@ -277,7 +277,7 @@ getStars name =
       runMigration migrateAll
       maybeEle <- getBy $ UniqueUsername name
       case maybeEle of
-        Nothing -> return 0
+        Nothing                            -> return 0
         Just (Entity _ (User _ _ _ s _ _)) -> return s
 
 -------------------------------------------------------------
@@ -288,7 +288,7 @@ getStars name =
 deleteFlag :: T.Text    -- name
            -> T.Text    -- pid
            -> IO ()
-deleteFlag name pid = 
+deleteFlag name pid =
   runStdoutLoggingT $ withPostgresqlPool connStr 10 $ \pool ->
     liftIO $ flip runSqlPersistMPool pool $ do
       runMigration migrateAll
@@ -304,7 +304,7 @@ deletePost :: T.Text    -- name
            -> T.Text    -- pid
            -> Int       -- line
            -> IO ()
-deletePost name pid line = 
+deletePost name pid line =
   runStdoutLoggingT $ withPostgresqlPool connStr 10 $ \pool ->
     liftIO $ flip runSqlPersistMPool pool $ do
       runMigration migrateAll
@@ -353,7 +353,7 @@ getSubscr user =
       runMigration migrateAll
       x <- selectFirst [UserUsername ==. user] []
       case x of
-        Nothing -> return False
+        Nothing                            -> return False
         Just (Entity _ (User _ _ _ _ _ s)) -> return s
 
 
@@ -369,5 +369,5 @@ getUserById uid =
         Just (Entity _ (NewsPost _ _ _ _ a)) -> do
              user <- get a
              case user of
-               Nothing -> return "guest"
+               Nothing                    -> return "guest"
                Just (User _ name _ _ _ _) -> return name

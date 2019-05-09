@@ -15,25 +15,25 @@ module Skeleton.Kernel.Post (
        , getBetaNews
        ) where
 
-import  qualified Data.Text.Lazy          as TL
+import qualified Data.Text.Lazy                 as TL
 
-import  Skeleton.Kernel.Internal.Model
-import  Skeleton.Kernel.Internal.Type
-import  Skeleton.Kernel.Account         
-import  Control.Monad.IO.Class
-import  Data.Time.Clock
-import  Database.Persist
-import  Database.Persist.Postgresql
-import  Control.Monad.Logger
-import  Web.Scotty                        (ActionM)
-import  Skeleton.Kernel.Core.Helper       hiding (week)
+import           Control.Monad.IO.Class
+import           Control.Monad.Logger
+import           Data.Time.Clock
+import           Database.Persist
+import           Database.Persist.Postgresql
+import           Skeleton.Kernel.Account
+import           Skeleton.Kernel.Core.Helper    hiding (week)
+import           Skeleton.Kernel.Internal.Model
+import           Skeleton.Kernel.Internal.Type
+import           Web.Scotty                     (ActionM)
 
-import  Skeleton.Kernel.Core.Cache
-import  Control.Concurrent                (MVar)
+import           Control.Concurrent             (MVar)
+import           Skeleton.Kernel.Core.Cache
 
 -- must be called before scotty
 initializeNewsDb :: IO ()
-initializeNewsDb = 
+initializeNewsDb =
   runStdoutLoggingT $ withPostgresqlPool connStr 10 $ \pool ->
     liftIO $ flip runSqlPersistMPool pool $ do
       runMigration migrateAll
@@ -58,19 +58,19 @@ modifyNews op uniqueId =
           maybeEle <- getBy $ UniqueIdw uniqueId
           case maybeEle of
             Nothing -> return ()
-            Just (Entity uid news) -> 
+            Just (Entity uid news) ->
               update uid [WorldStars =. (+1) (getStarsW news)]
         2 -> do
           maybeEle <- getBy $ UniqueIda uniqueId
           case maybeEle of
             Nothing -> return ()
-            Just (Entity uid news) -> 
+            Just (Entity uid news) ->
               update uid [AlphaStars =. (+1) (getStarsA news)]
         3 -> do
           maybeEle <- getBy $ UniqueIdb uniqueId
           case maybeEle of
             Nothing -> return ()
-            Just (Entity uid news) -> 
+            Just (Entity uid news) ->
               update uid [BetaStars =. (+1) (getStarsB news)]
         _ -> liftIO $ print "impossible error!"
         where
@@ -91,7 +91,7 @@ updateNewsCount line = do
       maybeEle <- getBy $ UniqueName "unique"
       case maybeEle of
         Nothing -> return "impossible"
-        Just (Entity uid ele) -> 
+        Just (Entity uid ele) ->
           case line of
             1 -> do
               update uid [StatisticsTotalw =. (+1) (getTotW ele)]
@@ -103,7 +103,7 @@ updateNewsCount line = do
               update uid [StatisticsTotalb =. (+1) (getTotB ele)]
               return (show $ getTotB ele)
           where
-            getTotW (Statistics s _ _ _ ) = s 
+            getTotW (Statistics s _ _ _ ) = s
             getTotA (Statistics _ s _ _ ) = s
             getTotB (Statistics _ _ s _ ) = s
 
@@ -111,7 +111,7 @@ updateNewsCount line = do
 checkNoNews :: TL.Text
             -> Int
             -> IO Bool
-checkNoNews u radio = 
+checkNoNews u radio =
   runStdoutLoggingT $ withPostgresqlPool connStr 10 $ \pool ->
     liftIO $ flip runSqlPersistMPool pool $ do
       runMigration migrateAll
@@ -137,7 +137,7 @@ insertNews :: Int
            -> TL.Text
            -> String
            -> (MVar CacheList, MVar CacheList, MVar CacheList)
-           -> ActionM ()
+           -> IO ()
 insertNews op author title url host imgO intro idV (cw, cb, ca) =
   runStdoutLoggingT $ withPostgresqlPool connStr 10 $ \pool ->
     liftIO $ flip runSqlPersistMPool pool $ do
@@ -157,27 +157,27 @@ insertNews op author title url host imgO intro idV (cw, cb, ca) =
           return ()
         2 -> do
           liftIO $ insertCache (author, pageid, title, url, host, img, intro, ct, week, 0) ca
-          insert $ Alpha author pageid title url host img intro ct week 0 
+          insert $ Alpha author pageid title url host img intro ct week 0
           return ()
         _ -> do
           liftIO $ insertCache (author, pageid, title, url, host, img, intro, ct, week, 0) cb
-          insert $ Beta author pageid title url host img intro ct week 0 
+          insert $ Beta author pageid title url host img intro ct week 0
           return ()
       liftIO $ updateUserPost ct title url pageid author
       return ()
- 
+
 
 -------------------------------------------------------------
 -- get news
 -------------------------------------------------------------
-    
+
 getWorldNews :: IO [Entity World]
 getWorldNews =
   runStdoutLoggingT $ withPostgresqlPool connStr 10 $ \pool ->
     liftIO $ flip runSqlPersistMPool pool $ do
       runMigration migrateAll
       -- choose which stars >= 0, for those which stars < 0 are forbiddened
-      selectList [WorldStars >=. 0] []  
+      selectList [WorldStars >=. 0] []
 
 getAlphaNews :: IO [Entity Alpha]
 getAlphaNews =
@@ -198,7 +198,7 @@ defaultEle :: UTCTime
 defaultEle u = ("", "impossibleid0", "Illegal Page", "", "", "",
                 "The possible reason for you viewing this page is\
                 \ that you pass the WRONG url, fix it for accessing\
-                \ the page you really want", u, ("unknown", "unknown"), 0) 
+                \ the page you really want", u, ("unknown", "unknown"), 0)
 
 
 getOneNews :: Int
