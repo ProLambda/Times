@@ -168,7 +168,6 @@ var setPage = function() {
         } 
     });
 };
-
 var dashPage = function() {
     $("#chat_frame").hide();
     $("#main_frame").hide();
@@ -475,11 +474,11 @@ var starpost = function(pageid, line) {
 	        if(data == 'ok200'){
                 $.get(status, function(_data){
                     if (op == 1)
-                        $("#main_frame_1").html(_data); 
+                        $("#main_frame_1").html(_data);
                     else if (op == 2)
-                        $("#main_frame_3").html(_data); 
-                    else    
-                        $("#main_frame_2").html(_data); 
+                        $("#main_frame_3").html(_data);
+                    else
+                        $("#main_frame_2").html(_data);
                     DISQUSWIDGETS.getCount({reset: true});
                 });
             } else if (data == '/login'){
