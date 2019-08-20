@@ -590,6 +590,26 @@ var sdata = $("#submitn").serializeArray();
     });
 }
 
+$("form#uploadform").submit(function(){
+
+    var formData = new FormData($(this)[0]);
+
+    $.ajax({
+        url: '/upload',
+        type: 'POST',
+        data: formData,
+        async: false,
+        success: function (data) {
+            $("#inputURLimg").val(data);
+        },
+        cache: false,
+        contentType: false,
+        processData: false
+    });
+
+    return false;
+});
+
 var submitnews = function() {
     var renderHtml = `<div class='alert alert-dismissible alert-warning'>
                 <button type='button' class='close' data-dismiss='alert'>&times;</button>`;

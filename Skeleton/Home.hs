@@ -54,9 +54,6 @@ import           Skeleton.Kernel.Internal.Type
 import           Web.Scotty.Cookie
 
 import           System.FilePath               ((</>))
-import           Text.Blaze.Html.Renderer.Text (renderHtml)
-import qualified Text.Blaze.Html5              as H
-import           Text.Blaze.Html5.Attributes
 
 -------------------------------------------------------------
 -- helper cache -- refresh cache or not
@@ -357,7 +354,7 @@ uploadimg =
     fs <- files
     let fs' = [(fieldName, BS.unpack (fileName fi), fileContent fi) | (fieldName, fi) <- fs]
     liftIO $ sequence_ [B.writeFile ("./imgs" </> fn) fc | (_, fn, fc) <- fs']
-    text (head [mconcat [fName, ": " , T.pack fn] | (fName, fn, _) <- fs'])
+    text (head [mconcat ["./" , T.pack fn] | (_, fn, _) <- fs'])
 
 
 -- serve submit news ability

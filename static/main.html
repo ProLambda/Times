@@ -130,7 +130,7 @@
                     <span class="fa fa-camera-retro"/>
                   </label>
                   <div class="col-lg-10">
-                    <input name="img" type="text" class="form-control" id="inputURL" placeholder="Link of title picture(optional)">
+                    <input name="img" type="text" class="form-control" id="inputURLimg" placeholder="Link of title picture(optional)">
                   </div>
                 </div>
 
@@ -181,6 +181,18 @@
                   </div>
                 </div>
 
+              </fieldset>
+            </form>
+            <hr>
+            <form id="uploadform" method="post" enctype="multipart/form-data" action="/upload" class="form-horizontal">
+              <fieldset>
+                <div class="form-group">
+                  <label for="" class="col-lg-2 control-label">UPLOAD</label>
+                  <div class="col-lg-10 ">
+                    <input type="file" name="uploadfile" id="uploadfile"><br>
+                    <button id="uploadbtn" type="submit" class="btn btn-warning">上传图片(可选)</button>
+                  </div>
+                </div>
               </fieldset>
             </form>
           </div>
