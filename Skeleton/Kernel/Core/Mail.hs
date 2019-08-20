@@ -3,17 +3,13 @@ module Skeleton.Kernel.Core.Mail(
        mailLoop
        ) where
 
-import  Skeleton.Kernel.Internal.Model
 import  Skeleton.Kernel.Internal.Type
 import  Skeleton.Kernel.Account
-import  Database.Persist
 
 import  Network.HaskellNet.SMTP.SSL
-import  Skeleton.Kernel.Core.Cache
 import  Skeleton.Kernel.Core.Sort
 import  Control.Concurrent                    (readMVar, MVar)
 import  Network.Mail.Mime
-import  Data.List                             (sortOn)
 import  Text.Printf                           (printf)
 import  qualified Data.Text as DT
 import  qualified Data.Text.Lazy as T

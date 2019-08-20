@@ -44,8 +44,6 @@ import           Database.Persist.Postgresql
 import           Prelude                        hiding (id)
 import           Skeleton.Kernel.Internal.Model
 import           Skeleton.Kernel.PostHelper
-import           Web.Scotty                     (ActionM)
-
 
 authUser :: String
          -> IO (Maybe (Entity User))

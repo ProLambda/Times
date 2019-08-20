@@ -4,6 +4,7 @@
 module Skeleton.Home
        (   home
          , submitnews
+         , uploadimg
          , notfound
          , logout
          , login
@@ -25,6 +26,8 @@ module Skeleton.Home
          , union
        ) where
 
+import qualified Data.ByteString.Char8         as BS
+import qualified Data.ByteString.Lazy          as B
 import qualified Data.Text                     as TS
 import qualified Data.Text.Lazy                as T
 
@@ -44,10 +47,16 @@ import           Prelude                       hiding (id)
 import           Skeleton.Kernel.Map
 
 import           Control.Concurrent            (MVar, forkIO, readMVar)
+import           Network.Wai.Parse
 import           Skeleton.Kernel.Core.Cache
 import           Skeleton.Kernel.Core.Secure
 import           Skeleton.Kernel.Internal.Type
 import           Web.Scotty.Cookie
+
+import           System.FilePath               ((</>))
+import           Text.Blaze.Html.Renderer.Text (renderHtml)
+import qualified Text.Blaze.Html5              as H
+import           Text.Blaze.Html5.Attributes
 
 -------------------------------------------------------------
 -- helper cache -- refresh cache or not
@@ -103,6 +112,7 @@ beta b = get "/beta" $ do
 about :: ScottyM ()
 about = get "/about" $
   file "./static/pages/about.html"
+
 
 -- serve main page
 home :: ScottyM ()
@@ -340,6 +350,16 @@ deletepost cache page =
             text "ok200"
 
 
+-- serve upload img ability
+uploadimg :: ScottyM ()
+uploadimg =
+  post "/upload" $ do
+    fs <- files
+    let fs' = [(fieldName, BS.unpack (fileName fi), fileContent fi) | (fieldName, fi) <- fs]
+    liftIO $ sequence_ [B.writeFile ("./imgs" </> fn) fc | (_, fn, fc) <- fs']
+    text (head [mconcat [fName, ": " , T.pack fn] | (fName, fn, _) <- fs'])
+
+
 -- serve submit news ability
 submitnews :: (MVar CacheList, MVar CacheList, MVar CacheList)
            -> (MVar PageCache, MVar PageCache, MVar PageCache)
@@ -360,7 +380,7 @@ submitnews cache@(w, b, a) (w', b', a') =
                        3 -> (Academ, b, b')
                        _ -> (Asks  , a, a')
     -- check if unique
-    let uri = if rawurl == "" && radios == 2
+    let uri = if True -- rawurl == "" && radios == 2
                  then return "/#"
                  else do
                       let url' = T.pack $ urlWrapper rawurl
