@@ -46,6 +46,7 @@ executable          proj
                   , bytestring
                   , pureMD5
                   , random
+                  , filepath
 
     other-modules: Skeleton.Home
                  , Skeleton.Kernel.Account
