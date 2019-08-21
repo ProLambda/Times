@@ -22,8 +22,11 @@ import           Utilities.Login.Session
 import           Web.Scotty
 
 import           Skeleton.Kernel.Internal.Type
-
 import           Skeleton.Shell.Template
+
+import           Data.List                            (isSuffixOf)
+import           System.Directory
+import           System.IO
 
 
 -- import Utilities.Msg.Mailbox
@@ -60,6 +63,18 @@ loop :: (MVar CacheList, MVar CacheList, MVar CacheList)
 loop cache = do
   mailLoop cache
   threadDelay $ 7 * 86400 * 1000000  -- once a week
+
+loopHeaderImg :: String -> String -> IO ()
+loopHeaderImg src dest = do
+  fileNames' <- listDirectory src
+  let fileNames = filter (\x -> isSuffixOf ".jpg" x) fileNames'
+  forM_ fileNames $ \headerimg -> do
+    -- rename old header to temp
+    print ("change background img to " ++ headerimg)
+    renameFile (dest ++ "header.jpg") (src ++ "temp.jpg")
+    renameFile (src ++ headerimg) (dest ++ "header.jpg")
+    renameFile (src ++ "temp.jpg") (src ++ headerimg)
+    threadDelay $ 10000000
 
 
 routes :: (MVar CacheList, MVar CacheList, MVar CacheList,
@@ -117,6 +132,8 @@ main = do
 
   _ <- forkIO chatroom                       -- chatroom
   _ <- forkIO . forever $ loop (cw, cb, ca)  -- send mails once a week
+  -- change header img once a day
+  _ <- forkIO . forever $ loopHeaderImg "./static/headerimg/" "./static/dist/img/"
   -- reload the session database into memory, must be called before scotty
   initializeCookieDb config
   scotty port $ routes (cw, cb, ca, pw, pb, pa)
