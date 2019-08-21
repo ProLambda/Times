@@ -74,7 +74,7 @@ loopHeaderImg src dest = do
     renameFile (dest ++ "header.jpg") (src ++ "temp.jpg")
     renameFile (src ++ headerimg) (dest ++ "header.jpg")
     renameFile (src ++ "temp.jpg") (src ++ headerimg)
-    threadDelay $ 10000000
+    threadDelay $ 86400 * 10000000  -- once a day
 
 
 routes :: (MVar CacheList, MVar CacheList, MVar CacheList,
