@@ -14,6 +14,8 @@ A Hacker-News-like social information platform written in Haskell, focusing on I
 
 Please configure following settings before your first launch:
 
+0. Set 'allow-newer: true' in ~/.stack/config.yaml
+
 1. Configure postgre server, and set dbname/pass/etc. in Skeleton/Kernel/Internal/Model.hs
 
 2. Set email account in Skeleton/Kernel/Core/Mail.hs
