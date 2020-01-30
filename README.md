@@ -37,6 +37,7 @@ Please configure following settings before your first launch:
 5. Comment all 3 lines in step 4 and then `$stack build` again
 6. For DISQUS configuration, please check relative JS code in main.html
 7. For PostgreSQL setting, please refer to official doc
+8. create 'database' and 'imgs' folder in root dir
 
 ### Demo ###
 
