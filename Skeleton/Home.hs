@@ -377,7 +377,7 @@ submitnews cache@(w, b, a) (w', b', a') =
                        3 -> (Academ, b, b')
                        _ -> (Asks  , a, a')
     -- check if unique
-    let uri = if True -- rawurl == "" && radios == 2
+    let uri = if rawurl == "" && radios == 2
                  then return "/#"
                  else do
                       let url' = T.pack $ urlWrapper rawurl
